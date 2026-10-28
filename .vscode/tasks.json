@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ESPHome: Build",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/esphome.exe",
+      "args": [
+        "compile",
+        "shapdesk.yaml"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "ESPHome: Flash",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/esphome.exe",
+      "args": [
+        "upload",
+        "shapdesk.yaml"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "dependsOn": "ESPHome: Build",
+      "dependsOrder": "sequence",
+      "group": "build"
+    },
+    {
+      "label": "ESPHome: Logs",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/esphome.exe",
+      "args": [
+        "logs",
+        "shapdesk.yaml"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

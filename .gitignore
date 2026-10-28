@@ -1,0 +1,12 @@
+.venv/
+.esphome/
+build/
+secrets.yaml
+__pycache__/
+*.pyc
+AGENTS.md
+PROJECT_CONTEXT.md
+VALIDATION.md
+SOURCE_PROVENANCE.md
+.agents/
+.codex/

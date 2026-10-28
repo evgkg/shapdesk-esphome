@@ -10,3 +10,15 @@ VALIDATION.md
 SOURCE_PROVENANCE.md
 .agents/
 .codex/
+
+# KiCad: local/generated files (the ZIP in hardware/pcb is the fab deliverable)
+hardware/pcb/fab/
+hardware/pcb/renders/
+hardware/pcb/make_fab.log
+hardware/pcb/drc_report.txt
+hardware/pcb/erc_report.txt
+hardware/pcb/_*
+*.kicad_prl
+*-backups/
+fp-info-cache
+~*.lck

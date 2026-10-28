@@ -1,5 +1,8 @@
 substitutions:
   name: shapdesk
+  # Ревизия платы: 1 — самодельная rev1, 2 — заводская rev2 (на них разные GPIO у кнопок и UART RX, см. README).
+  # Board revision: 1 = home-made rev1, 2 = fab rev2. Wrong value = wrong pins, check before flashing.
+  board_revision: "2"
   # Проверьте соответствие K3–K6 физическим пресетам.
   k3_name: "Пресет 1"
   k4_name: "Пресет 2"
@@ -70,11 +73,12 @@ wifi:
 
 captive_portal:
 
-# Компонент владеет UART1: GPIO4 RX, 9600 8N1, без TX.
+# Компонент владеет UART1: RX на GPIO4 (rev1) или GPIO6 (rev2), 9600 8N1, без TX.
 
 shapdesk:
   id: desk
   name: "Стол"
+  board_revision: ${board_revision}
   max_hold_ms: ${max_hold_ms}
   pulse_ms: ${pulse_ms}
   start_timeout_ms: ${start_timeout_ms}

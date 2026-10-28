@@ -24,6 +24,8 @@ CONFIG_SCHEMA = cv.All(cover.cover_schema(Shapdesk).extend({
     cv.Optional('tolerance', default=1): cv.float_range(min=0, max=5),
     cv.Optional('stop_offset', default=1): cv.float_range(min=0, max=5),
     cv.Optional('adapt', default=True): cv.boolean,
+    # 1 = home-made rev1 board, 2 = fab board rev2 (different key GPIOs and UART RX pin, see README)
+    cv.Optional('board_revision', default=2): cv.int_range(min=1, max=2),
     cv.Required('height'): sensor.sensor_schema(unit_of_measurement='cm', accuracy_decimals=0),
     cv.Required('display'): sensor.sensor_schema(unit_of_measurement='cm', accuracy_decimals=0, entity_category='diagnostic'),
     cv.Required('raw'): sensor.sensor_schema(accuracy_decimals=0, entity_category='diagnostic'),
@@ -37,7 +39,7 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await cover.register_cover(var, config)
-    for key in ['max_hold_ms','pulse_ms','start_timeout_ms','minimum','maximum','tolerance','stop_offset','adapt']:
+    for key in ['board_revision','max_hold_ms','pulse_ms','start_timeout_ms','minimum','maximum','tolerance','stop_offset','adapt']:
         cg.add(getattr(var, 'set_' + key)(config[key]))
     for key in ['height','display','raw','good','rejected']:
         entity = await sensor.new_sensor(config[key])

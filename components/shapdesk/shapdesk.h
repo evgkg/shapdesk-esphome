@@ -35,6 +35,15 @@ class Shapdesk : public Component, public cover::Cover, public shapdesk_core::Ou
   void set_tolerance(float value) { controller.settings.tolerance = value; }
   void set_stop_offset(float value) { controller.settings.stop_offset = value; }
   void set_adapt(bool value) { controller.settings.adapt = value; }
+  void set_board_revision(int rev) {
+    board_revision_ = rev;
+    static constexpr int REV1[7]{5, 6, 7, 10, 0, 1, 3};   // home-made board
+    static constexpr int REV2[7]{5, 3, 7, 0, 10, 1, 4};   // fab board (layout order, no pin with a reset pull-up)
+    for (int i = 0; i < 7; i++) pins_[i] = rev == 2 ? REV2[i] : REV1[i];
+    rx_pin_ = rev == 2 ? 6 : 4;
+    MASK = 0;
+    for (int pin : pins_) MASK |= 1u << pin;
+  }
   void set_height(sensor::Sensor *value) { height = value; }
   void set_display(sensor::Sensor *value) { display = value; }
   void set_raw(sensor::Sensor *value) { raw = value; }
@@ -47,7 +56,12 @@ class Shapdesk : public Component, public cover::Cover, public shapdesk_core::Ou
   binary_sensor::BinarySensor *moving{}, *link{};
  protected:
   static bool IRAM_ATTR alarm(gptimer_handle_t, const gptimer_alarm_event_data_t *, void *);
-  static constexpr uint32_t MASK = (1u<<5)|(1u<<6)|(1u<<7)|(1u<<10)|(1u<<0)|(1u<<1)|(1u<<3);
+  // K1..K7 GPIOs. Board rev1: 5,6,7,10,0,1,3 + UART RX GPIO4. Board rev2: 5,3,7,0,10,1,4 + UART RX GPIO6
+  // (GPIO6/MTCK has an internal pull-up at reset, which pressed DOWN while flashing rev1).
+  static uint32_t MASK;
+  static int pins_[7];
+  int rx_pin_{6};
+  int board_revision_{2};
   static portMUX_TYPE lock_;
   static volatile int64_t deadline_;
   static volatile bool active_;

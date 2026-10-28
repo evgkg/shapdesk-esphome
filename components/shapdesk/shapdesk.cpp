@@ -14,6 +14,9 @@ portMUX_TYPE Shapdesk::lock_ = portMUX_INITIALIZER_UNLOCKED;
 volatile int64_t Shapdesk::deadline_ = 0;
 volatile bool Shapdesk::active_ = false;
 volatile int64_t Shapdesk::released_at_ = -50000;
+// Defaults = board rev1; set_board_revision() is called from YAML before setup().
+DRAM_ATTR uint32_t Shapdesk::MASK = (1u<<5)|(1u<<3)|(1u<<7)|(1u<<0)|(1u<<10)|(1u<<1)|(1u<<4);
+int Shapdesk::pins_[7] = {5, 3, 7, 0, 10, 1, 4};  // rev2 by default
 bool IRAM_ATTR Shapdesk::alarm(gptimer_handle_t, const gptimer_alarm_event_data_t *, void *) {
   portENTER_CRITICAL_ISR(&lock_);
   if (active_ && esp_timer_get_time() >= deadline_) {
@@ -31,12 +34,11 @@ bool Shapdesk::active() const {
 }
 bool Shapdesk::press(int key, uint32_t duration) {
   if (!ready_ || !shapdesk_core::valid_press(key, duration, controller.settings.max_hold_ms)) return false;
-  static constexpr int pins[]{5,6,7,10,0,1,3};
   portENTER_CRITICAL(&lock_);
   if (active_ || esp_timer_get_time() - released_at_ < 50000) { portEXIT_CRITICAL(&lock_); return false; }
   GPIO.out_w1tc.val = MASK;
   deadline_ = esp_timer_get_time() + static_cast<int64_t>(duration) * 1000;
-  active_ = true; GPIO.out_w1ts.val = 1u << pins[key-1];
+  active_ = true; GPIO.out_w1ts.val = 1u << pins_[key-1];
   portEXIT_CRITICAL(&lock_); return true;
 }
 void Shapdesk::setup() {
@@ -59,10 +61,15 @@ void Shapdesk::setup() {
   if (err == ESP_OK) err = uart_driver_install(UART_NUM_1, 8192, 0, 64, &uart_events_, 0);
   if (err == ESP_OK) err = uart_param_config(UART_NUM_1, &serial);
   // TX explicitly disconnected; no UART write call exists in this component.
-  if (err == ESP_OK) err = uart_set_pin(UART_NUM_1, UART_PIN_NO_CHANGE, 4, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+  if (err == ESP_OK) err = uart_set_pin(UART_NUM_1, UART_PIN_NO_CHANGE, rx_pin_, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+  // The desk drives RX through the 10k/18k divider, so no internal pull is needed. Keeping the pin
+  // without pull-up also means a wrong board_revision cannot hold a key line HIGH.
+  if (err == ESP_OK) err = gpio_pullup_dis(static_cast<gpio_num_t>(rx_pin_));
   if (err != ESP_OK) { release(); mark_failed(); ESP_LOGE("shapdesk", "Guard setup failed: %s", esp_err_to_name(err)); return; }
   controller.learned_offset[0] = controller.learned_offset[1] = controller.settings.stop_offset;
   ready_ = true;
+  ESP_LOGI("shapdesk", "Board rev%d: K1..K7 = GPIO%d/%d/%d/%d/%d/%d/%d, UART RX = GPIO%d", board_revision_,
+           pins_[0], pins_[1], pins_[2], pins_[3], pins_[4], pins_[5], pins_[6], rx_pin_);
 }
 static bool connected() {
   return wifi::global_wifi_component->is_connected() && api::global_api_server->is_connected();

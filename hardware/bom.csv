@@ -1,0 +1,20 @@
+Group,Reference,Qty,Value / Part,Package,Notes
+Board,PCB,1,shapdesk_rev2 (2 layers 1.6 mm),91.2 x 18 mm,Gerbers: hardware/pcb/shapdesk_rev2_gerbers.zip
+Board,U1,1,ESP32-C3 SuperMini,module 2x8 pins 2.54 mm,Soldered on the top side on the 1x8 pin headers supplied with it
+Board,U2,1,ME6211C33M5G-N,SOT-23-5,3.3 V LDO from the handset 5 V
+Board,"C1, C2",2,10 uF ceramic (>=10 V),0805,LDO input / output
+Board,Q1-Q7,7,MMBT3904,SOT-23,NPN key per button
+Board,R1-R7,7,100 k,0603,Base-emitter pull-down (keeps keys off during reset)
+Board,R8-R14,7,4.7 k,0603,Base series resistor
+Board,R15,1,10 k,0603,UART divider (desk 5 V -> 3.2 V)
+Board,R16,1,18 k,0603,UART divider
+Board,J1,1,Pin header 2x5 right angle,2.54 mm THT,Cable connector
+Cable,,1,Dupont housing 2x5 female,2.54 mm,
+Cable,,9,Dupont female crimp terminal,2.54 mm,Pin 10 is not used
+Cable,,9,Thin stranded wire,,From J1 to the handset PCB (length to suit)
+Mechanics,,1,Enclosure,3D print,hardware/enclosure/shapdesk_enclosure.stl
+Mechanics,,1,Connector retainer,3D print,hardware/enclosure/shapdesk_connector_retainer.stl
+Mechanics,,3,Heat-set insert M2 x 2.5 x 3.2,,Board mounting (melted into the enclosure)
+Mechanics,,3,Screw M2 x 8 button head hex socket (ISO 7380),,Board to enclosure
+Mechanics,,2,Heat-set insert M3 x 4 x 4,,Melted into the stock handset back shell
+Mechanics,,2,Screw M3 x 6 button head hex socket (ISO 7380),,Enclosure to handset
